@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>选课助手 Demo 演示</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+SC:wght@600;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* ===========================================
+       CSS CUSTOM PROPERTIES
+       =========================================== */
+    :root {
+      --ink: #1c1b18;
+      --ink-soft: #514e46;
+      --ink-mute: #8d897d;
+      --paper: #f4f0e6;
+      --paper-card: #fbf8f0;
+      --line: #d9d4c5;
+      --accent: #2f6fb0;
+      --accent-soft: #dbe9f7;
+      --warn: #b8472a;
+      --warn-soft: #f2d6cd;
+      --green: #2f7d56;
+      --green-soft: #dfeee5;
+      --yellow: #d6a632;
+      --yellow-soft: #f4e7c5;
+      --shadow: 0 28px 90px rgba(32, 28, 20, 0.12);
+      --font-display: "Noto Serif SC", serif;
+      --font-body: "Noto Sans SC", sans-serif;
+      --title-size: clamp(1.9rem, 5.2vw, 5.4rem);
+      --h2-size: clamp(1.35rem, 3.3vw, 3.1rem);
+      --h3-size: clamp(1rem, 2.1vw, 1.55rem);
+      --body-size: clamp(0.8rem, 1.38vw, 1.18rem);
+      --small-size: clamp(0.66rem, 1vw, 0.88rem);
+      --slide-padding: clamp(1rem, 3.2vw, 3.2rem);
+      --content-gap: clamp(0.6rem, 1.8vw, 1.7rem);
+      --element-gap: clamp(0.35rem, 1vw, 0.9rem);
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --duration-normal: 0.62s;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ===========================================
+       VIEWPORT FITTING: MANDATORY BASE STYLES
+       Include this ENTIRE file in every presentation.
+       These styles ensure slides fit exactly in the viewport.
+       =========================================== */
+    html, body {
+        height: 100%;
+        overflow-x: hidden;
+    }
+
+    html {
+        scroll-snap-type: y mandatory;
+        scroll-behavior: smooth;
+    }
+
+    .slide {
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+        scroll-snap-align: start;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+
+    .slide-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        max-height: 100%;
+        overflow: hidden;
+        padding: var(--slide-padding);
+    }
+
+    .card, .container, .content-box {
+        max-width: min(90vw, 1000px);
+        max-height: min(80vh, 700px);
+    }
+
+    .feature-list, .bullet-list {
+        gap: clamp(0.4rem, 1vh, 1rem);
+    }
+
+    .feature-list li, .bullet-list li {
+        font-size: var(--body-size);
+        line-height: 1.4;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+        gap: clamp(0.5rem, 1.5vw, 1rem);
+    }
+
+    img, .image-container {
+        max-width: 100%;
+        max-height: min(50vh, 400px);
+        object-fit: contain;
+    }
+
+    @media (max-height: 700px) {
+        :root {
+            --slide-padding: clamp(0.75rem, 3vw, 2rem);
+            --content-gap: clamp(0.4rem, 1.5vw, 1rem);
+            --title-size: clamp(1.25rem, 4.5vw, 2.5rem);
+            --h2-size: clamp(1rem, 3vw, 1.75rem);
+        }
+    }
+
+    @media (max-height: 600px) {
+        :root {
+            --slide-padding: clamp(0.5rem, 2.5vw, 1.5rem);
+            --content-gap: clamp(0.3rem, 1vw, 0.75rem);
+            --title-size: clamp(1.1rem, 4vw, 2rem);
+            --body-size: clamp(0.7rem, 1.2vw, 0.95rem);
+        }
+
+        .nav-dots, .keyboard-hint, .decorative {
+            display: none;
+        }
+    }
+
+    @media (max-height: 500px) {
+        :root {
+            --slide-padding: clamp(0.4rem, 2vw, 1rem);
+            --title-size: clamp(1rem, 3.5vw, 1.5rem);
+            --h2-size: clamp(0.9rem, 2.5vw, 1.25rem);
+            --body-size: clamp(0.65rem, 1vw, 0.85rem);
+        }
+    }
+
+    @media (max-width: 600px) {
+        :root {
+            --title-size: clamp(1.25rem, 7vw, 2.5rem);
+        }
+
+        .grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            transition-duration: 0.2s !important;
+        }
+
+        html {
+            scroll-behavior: auto;
+        }
+    }
+
+    /* ===========================================
+       BASE
+       =========================================== */
+    body {
+      font-family: var(--font-body);
+      background: #0d0d0d;
+      color: var(--ink);
+    }
+
+    .progress-bar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 0%;
+      height: 5px;
+      background: linear-gradient(90deg, var(--accent), #6ea5d8, var(--green));
+      z-index: 60;
+      transition: width 220ms ease;
+    }
+
+    .nav-dots {
+      position: fixed;
+      right: clamp(12px, 1.5vw, 24px);
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 50;
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav-dots button {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      border: 0;
+      background: rgba(47, 43, 37, 0.25);
+      cursor: pointer;
+      transition: transform 160ms ease, background 160ms ease;
+    }
+
+    .nav-dots button.active {
+      background: var(--accent);
+      transform: scale(1.45);
+    }
+
+    .keyboard-hint {
+      position: fixed;
+      right: clamp(18px, 2vw, 38px);
+      bottom: clamp(14px, 2vw, 28px);
+      z-index: 40;
+      color: rgba(81, 78, 70, 0.62);
+      font-size: var(--small-size);
+      letter-spacing: 0.02em;
+    }
+
+    .slide {
+      background: var(--paper);
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition:
+        opacity var(--duration-normal) var(--ease-out-expo),
+        transform var(--duration-normal) var(--ease-out-expo);
+    }
+
+    .slide.visible .reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .slide.visible .reveal:nth-child(2) { transition-delay: 0.08s; }
+    .slide.visible .reveal:nth-child(3) { transition-delay: 0.16s; }
+    .slide.visible .reveal:nth-child(4) { transition-delay: 0.24s; }
+    .slide.visible .reveal:nth-child(5) { transition-delay: 0.32s; }
+
+    .chapter {
+      font-size: var(--small-size);
+      color: var(--ink-mute);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: clamp(12px, 1.7vw, 24px);
+    }
+
+    .pain-ref {
+      display: inline-flex; align-items: center; gap: 0.4em;
+      align-self: start;
+      font-size: var(--small-size);
+      color: var(--ink-mute); font-weight: 700;
+      background: rgba(141,137,125,0.1);
+      border-radius: 999px;
+      padding: 0.34em 0.8em;
+      letter-spacing: 0.01em;
+    }
+    .pain-ref::before { content: "↩"; color: var(--accent); font-weight: 900; }
+
+    h1, h2 {
+      font-family: var(--font-display);
+      letter-spacing: 0;
+      color: var(--ink);
+    }
+
+    h1 {
+      font-size: var(--title-size);
+      line-height: 1.08;
+      font-weight: 900;
+    }
+
+    h2 {
+      font-size: var(--h2-size);
+      line-height: 1.16;
+      font-weight: 800;
+    }
+
+    .lead {
+      font-size: var(--body-size);
+      line-height: 1.75;
+      color: var(--ink-soft);
+      max-width: 860px;
+      font-weight: 500;
+    }
+
+    em, .blue { color: var(--accent); font-style: normal; }
+    .red { color: var(--warn); }
+    .green { color: var(--green); }
+
+    /* ===========================================
+       COVER
+       =========================================== */
+    .cover-content {
+      position: relative; z-index: 2;
+      width: 100%; height: 100%;
+      display: grid; align-content: center;
+      gap: clamp(18px, 2.4vw, 34px);
+      padding: 0 clamp(28px, 7vw, 150px);
+    }
+    .cover-kicker {
+      font-size: var(--small-size);
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--ink-mute); font-weight: 700;
+    }
+    .cover-name {
+      font-size: clamp(3rem, 9vw, 9.5rem);
+      line-height: 0.98; font-weight: 900; color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+    .cover-name em { color: var(--accent); font-style: normal; }
+    .cover-sub {
+      font-size: clamp(1.1rem, 2.5vw, 2.4rem);
+      color: var(--ink-soft); font-weight: 500; line-height: 1.4;
+    }
+    .cover-rule { width: clamp(120px, 16vw, 280px); height: 4px; background: var(--accent); border-radius: 99px; }
+    .cover-meta {
+      display: flex; flex-wrap: wrap; gap: clamp(14px, 2vw, 32px);
+      font-size: clamp(0.9rem, 1.4vw, 1.3rem); color: var(--ink-soft); font-weight: 500;
+    }
+    .cover-meta b { color: var(--ink); font-weight: 800; }
+    .cover-foot {
+      position: absolute; left: clamp(28px, 7vw, 150px); bottom: clamp(24px, 3vw, 46px);
+      z-index: 2; font-size: var(--small-size); color: var(--ink-mute); letter-spacing: 0.04em;
+    }
+
+    /* ===========================================
+       TABLE OF CONTENTS
+       =========================================== */
+    .toc-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: clamp(14px, 2vw, 26px);
+      margin-top: clamp(20px, 2.4vw, 36px);
+    }
+    .toc-item {
+      display: grid; grid-template-columns: auto 1fr; gap: clamp(14px, 1.6vw, 24px);
+      align-items: start;
+      border: 1.5px solid var(--line); border-radius: 22px;
+      background: rgba(251,248,240,0.78);
+      padding: clamp(18px, 2vw, 30px) clamp(20px, 2.2vw, 34px);
+    }
+    .toc-item .num {
+      font-family: var(--font-display); font-weight: 900;
+      font-size: clamp(1.8rem, 3.6vw, 3.4rem); line-height: 0.9; color: var(--accent);
+    }
+    .toc-item h3 { font-size: var(--h3-size); color: var(--ink); margin-bottom: 0.3em; line-height: 1.2; }
+    .toc-item p { font-size: var(--small-size); color: var(--ink-soft); line-height: 1.5; font-weight: 600; }
+
+    /* ===========================================
+       CHAPTER DIVIDER
+       =========================================== */
+    .divider-content {
+      position: relative; z-index: 2;
+      width: 100%; height: 100%;
+      display: grid; align-content: center;
+      gap: clamp(16px, 2vw, 30px);
+      padding: 0 clamp(28px, 8vw, 170px);
+    }
+    .divider-num {
+      font-family: var(--font-display); font-weight: 900;
+      font-size: clamp(4rem, 14vw, 15rem); line-height: 0.85;
+      color: var(--accent); letter-spacing: -0.02em;
+    }
+    .divider-title {
+      font-size: clamp(2.2rem, 6vw, 6rem); line-height: 1.12;
+      font-weight: 900; color: var(--ink); letter-spacing: -0.01em;
+    }
+    .divider-rule { width: clamp(110px, 14vw, 240px); height: 4px; background: var(--accent); border-radius: 99px; }
+    .divider-sub {
+      font-size: clamp(1rem, 2vw, 1.9rem); color: var(--ink-soft);
+      font-weight: 500; line-height: 1.5; max-width: 1100px;
+    }
+
+    /* ===========================================
+       OPENING STORY
+       =========================================== */
+    .story-slide {
+      background: var(--paper);
+    }
+
+    .story-bg {
+      position: absolute;
+      inset: 0;
+      background-size: contain;
+      background-position: right center;
+      background-repeat: no-repeat;
+      background-color: var(--paper);
+    }
+
+    .story-scrim {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        100deg,
+        rgba(244,240,230,1) 0%,
+        rgba(244,240,230,0.98) 34%,
+        rgba(244,240,230,0.82) 48%,
+        rgba(244,240,230,0.25) 60%,
+        rgba(244,240,230,0) 70%
+      );
+    }
+
+    .story-panel {
+      position: relative;
+      z-index: 2;
+      width: min(58vw, 920px);
+      padding-left: clamp(24px, 6vw, 120px);
+      display: grid;
+      align-content: center;
+      gap: clamp(14px, 2vw, 24px);
+      height: 100%;
+    }
+
+    .story-tag {
+      font-size: var(--small-size);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink-mute);
+      font-weight: 700;
+    }
+
+    .story-title {
+      font-size: clamp(2rem, 4.6vw, 4.6rem);
+      line-height: 1.22;
+      font-weight: 900;
+      color: var(--ink);
+      font-family: var(--font-body);
+    }
+
+    .story-title .line { display: block; white-space: nowrap; }
+
+    .story-copy {
+      font-size: clamp(1rem, 2vw, 1.72rem);
+      line-height: 1.72;
+      color: var(--ink-soft);
+      display: grid;
+      gap: clamp(8px, 1vw, 14px);
+    }
+
+    .kw {
+      background: #e7dfc9;
+      color: var(--ink);
+      border-radius: 8px;
+      padding: 0.05em 0.36em;
+      font-weight: 800;
+    }
+
+    .mini-list {
+      display: grid;
+      gap: clamp(10px, 1.2vw, 16px);
+      max-width: 880px;
+    }
+
+    .mini {
+      background: rgba(251, 248, 240, 0.88);
+      border: 1.5px solid var(--line);
+      border-radius: 16px;
+      padding: clamp(14px, 2vw, 24px);
+      font-size: clamp(0.92rem, 1.65vw, 1.42rem);
+      line-height: 1.58;
+      color: var(--ink-soft);
+    }
+
+    .mini.faded { opacity: 0.68; }
+
+    .center-punch {
+      position: relative;
+      z-index: 2;
+      margin: auto;
+      width: min(86vw, 1420px);
+      text-align: center;
+      display: grid;
+      gap: clamp(18px, 3vw, 44px);
+    }
+
+    .center-punch .punch {
+      font-family: var(--font-display);
+      font-size: clamp(2.1rem, 5.7vw, 5.8rem);
+      line-height: 1.34;
+      font-weight: 900;
+    }
+
+    .center-punch .sub {
+      font-size: clamp(1rem, 1.9vw, 1.85rem);
+      color: var(--ink-soft);
+      line-height: 1.62;
+    }
+
+    .center-punch .product {
+      font-size: clamp(0.95rem, 1.7vw, 1.55rem);
+      color: var(--accent);
+      font-weight: 800;
+      line-height: 1.52;
+    }
+
+    .time-pill {
+      position: absolute;
+      left: clamp(18px, 3vw, 52px);
+      bottom: clamp(16px, 2vw, 34px);
+      z-index: 5;
+      color: var(--ink-mute);
+      font-size: var(--small-size);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    /* ===========================================
+       PRODUCT FRAME
+       =========================================== */
+    .split-frame {
+      display: grid;
+      grid-template-columns: 0.82fr 1.18fr;
+      gap: clamp(20px, 4vw, 64px);
+      align-items: center;
+      min-height: 0;
+    }
+
+    .layer-stack {
+      display: grid;
+      gap: clamp(14px, 2vw, 24px);
+    }
+
+    .layer {
+      border: 1.5px solid var(--line);
+      border-radius: 28px;
+      padding: clamp(18px, 2vw, 28px);
+      background: rgba(251, 248, 240, 0.78);
+      box-shadow: 0 12px 46px rgba(33, 32, 27, 0.06);
+    }
+
+    .layer.top {
+      border-color: rgba(47, 111, 176, 0.34);
+      background: linear-gradient(135deg, rgba(219, 233, 247, 0.92), rgba(251, 248, 240, 0.82));
+    }
+
+    .layer h3 {
+      font-size: var(--h3-size);
+      margin-bottom: 12px;
+      color: var(--ink);
+    }
+
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 0.5em 0.85em;
+      background: #fff;
+      border: 1px solid var(--line);
+      font-size: var(--small-size);
+      color: var(--ink-soft);
+      font-weight: 800;
+    }
+
+    .flow-card {
+      border-radius: 28px;
+      background: var(--paper-card);
+      border: 1.5px solid var(--line);
+      padding: clamp(22px, 3vw, 42px);
+      box-shadow: var(--shadow);
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(12px, 2vw, 26px);
+      margin-top: clamp(18px, 2vw, 30px);
+    }
+
+    .flow-step {
+      border-radius: 22px;
+      background: #f7f3e8;
+      border: 1px solid var(--line);
+      padding: clamp(14px, 2vw, 22px);
+      min-height: 150px;
+      display: grid;
+      align-content: space-between;
+    }
+
+    .flow-step b {
+      font-size: clamp(1.8rem, 4vw, 4rem);
+      color: var(--accent);
+      font-family: var(--font-display);
+      line-height: 1;
+    }
+
+    .flow-step span {
+      color: var(--ink-soft);
+      font-size: var(--body-size);
+      line-height: 1.5;
+      font-weight: 700;
+    }
+
+    /* ===========================================
+       MEDIA SLIDES
+       =========================================== */
+    .media-layout {
+      display: grid;
+      grid-template-columns: minmax(320px, 0.48fr) minmax(0, 1fr);
+      gap: clamp(18px, 3vw, 44px);
+      align-items: center;
+      min-height: 0;
+    }
+
+    .media-copy {
+      display: grid;
+      gap: clamp(14px, 2vw, 24px);
+    }
+
+    .media-frame {
+      position: relative;
+      border-radius: 26px;
+      border: 1.5px solid var(--line);
+      background: #111;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      aspect-ratio: 16 / 9;
+      max-height: min(68vh, 720px);
+      width: 100%;
+    }
+
+    .media-frame.tall {
+      aspect-ratio: 9 / 13;
+      width: min(42vw, 460px);
+      justify-self: center;
+    }
+
+    .media-frame video,
+    .media-frame img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+      background: #f7f3e8;
+      max-height: none;
+    }
+
+    .caption {
+      position: absolute;
+      left: clamp(12px, 1.5vw, 22px);
+      bottom: clamp(12px, 1.5vw, 22px);
+      padding: 0.5em 0.72em;
+      border-radius: 999px;
+      background: rgba(251, 248, 240, 0.92);
+      color: var(--ink);
+      font-size: var(--small-size);
+      font-weight: 900;
+      backdrop-filter: blur(8px);
+    }
+
+    .takeaway {
+      border-left: 5px solid var(--accent);
+      padding: clamp(14px, 1.8vw, 22px);
+      background: rgba(219, 233, 247, 0.6);
+      border-radius: 0 18px 18px 0;
+      color: var(--ink-soft);
+      font-size: var(--body-size);
+      line-height: 1.65;
+      font-weight: 700;
+    }
+
+    .bullet-cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(10px, 1.5vw, 16px);
+    }
+
+    .mini-card {
+      padding: clamp(12px, 1.6vw, 18px);
+      border-radius: 18px;
+      background: var(--paper-card);
+      border: 1px solid var(--line);
+      color: var(--ink-soft);
+      font-size: var(--small-size);
+      line-height: 1.45;
+      font-weight: 800;
+    }
+
+    .mini-card strong {
+      display: block;
+      color: var(--ink);
+      font-size: var(--body-size);
+      margin-bottom: 0.35em;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .tag {
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      padding: 0.48em 0.82em;
+      font-size: var(--small-size);
+      font-weight: 900;
+    }
+
+    .tag.warn { background: var(--warn-soft); color: var(--warn); }
+    .tag.green { background: var(--green-soft); color: var(--green); }
+    .tag.yellow { background: var(--yellow-soft); color: #9c6d10; }
+
+    /* ===========================================
+       MECHANISM AND ENDING
+       =========================================== */
+    .mechanism {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: clamp(14px, 2vw, 24px);
+      margin-top: clamp(22px, 3vw, 42px);
+    }
+
+    .mechanism-card {
+      border-radius: 24px;
+      border: 1.5px solid var(--line);
+      background: var(--paper-card);
+      padding: clamp(18px, 2vw, 28px);
+      min-height: 220px;
+      display: grid;
+      align-content: space-between;
+      box-shadow: 0 14px 44px rgba(33, 32, 27, 0.06);
+    }
+
+    .mechanism-card b {
+      color: var(--accent);
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 4.2rem);
+      line-height: 1;
+    }
+
+    .mechanism-card h3 {
+      font-size: var(--h3-size);
+      margin: 10px 0;
+    }
+
+    .mechanism-card p {
+      color: var(--ink-soft);
+      line-height: 1.55;
+      font-size: var(--small-size);
+      font-weight: 700;
+    }
+
+    .closing {
+      display: grid;
+      grid-template-columns: 1fr 0.95fr;
+      gap: clamp(20px, 4vw, 60px);
+      align-items: center;
+      min-height: 0;
+    }
+
+    .montage {
+      position: relative;
+      height: min(68vh, 690px);
+    }
+
+    .shot {
+      position: absolute;
+      border-radius: 24px;
+      border: 1.5px solid var(--line);
+      background: #fff;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(32, 28, 20, 0.14);
+    }
+
+    .shot img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #f7f3e8;
+      max-height: none;
+      display: block;
+    }
+
+    .shot.a { left: 0; top: 4%; width: 76%; height: 50%; }
+    .shot.b { right: 0; bottom: 4%; width: 72%; height: 50%; }
+
+    .closing-line {
+      font-family: var(--font-display);
+      font-size: clamp(2.1rem, 5vw, 5.6rem);
+      line-height: 1.2;
+      font-weight: 900;
+    }
+
+    /* ===========================================
+       RESPONSIVE
+       =========================================== */
+    @media (max-width: 920px) {
+      .story-panel {
+        width: 86vw;
+        padding-left: clamp(18px, 5vw, 52px);
+      }
+
+      .story-scrim {
+        background: rgba(244,240,230,0.88);
+      }
+
+      .split-frame,
+      .media-layout,
+      .closing {
+        grid-template-columns: 1fr;
+      }
+
+      .flow,
+      .mechanism {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .media-frame,
+      .media-frame.tall {
+        width: 100%;
+        max-height: 44vh;
+      }
+
+      .bullet-cards {
+        grid-template-columns: 1fr;
+      }
+
+      .montage {
+        height: 44vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar" id="progressBar"></div>
+  <nav class="nav-dots" id="navDots" aria-label="幻灯片导航"></nav>
+  <div class="keyboard-hint">← / → 或空格翻页</div>
+
+  <!-- ===========================================
+       00 COVER
+       =========================================== -->
+  <section class="slide">
+    <div class="cover-content">
+      <div class="cover-kicker reveal">帆软 AI 产品创造营 · 路演大作业</div>
+      <div class="cover-name reveal">Select<em>Wise</em></div>
+      <div class="cover-rule reveal"></div>
+      <div class="cover-sub reveal">AI 选课决策助手<br>把散乱口碑，变成高 stakes 选课里的可解释决策。</div>
+      <div class="cover-meta reveal">
+        <span><b>香港科技大学</b> · 李泓</span>
+        <span>2026.06</span>
+      </div>
+    </div>
+    <div class="cover-foot">deck · 选课助手 demo</div>
+  </section>
+
+  <!-- ===========================================
+       00 TABLE OF CONTENTS
+       =========================================== -->
+  <section class="slide">
+    <div class="slide-content">
+      <div>
+        <div class="chapter reveal">目录 · Contents</div>
+        <h2 class="reveal">四步，把一个真实的选课困境讲到底。</h2>
+        <div class="toc-grid">
+          <div class="toc-item reveal">
+            <div class="num">01</div>
+            <div><h3>一个真实的选课困境</h3><p>林晓在保研边缘，评价散乱、互相矛盾，没法拼成判断。</p></div>
+          </div>
+          <div class="toc-item reveal">
+            <div class="num">02</div>
+            <div><h3>产品框架</h3><p>评课社区底座 + AI 选课决策层，不是再做一个聊天入口。</p></div>
+          </div>
+          <div class="toc-item reveal">
+            <div class="num">03</div>
+            <div><h3>AI 如何把散乱评价变成决策</h3><p>结构化 · 证据回溯 · 矛盾提醒 · 课表冲突 · 可解释匹配。</p></div>
+          </div>
+          <div class="toc-item reveal">
+            <div class="num">04</div>
+            <div><h3>机制与收束</h3><p>LLM 只做语义结构化，排序统计走确定性规则，全程可追溯。</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===========================================
+       CHAPTER 01 DIVIDER
+       =========================================== -->
+  <section class="slide">
+    <div class="divider-content">
+      <div class="divider-num reveal">01</div>
+      <div class="divider-title reveal">一个真实的选课困境</div>
+      <div class="divider-rule reveal"></div>
+      <div class="divider-sub reveal">先不谈产品。看看林晓在保研边缘，是怎么被一堆评价困住的。</div>
+    </div>
+  </section>
+
+  <!-- ===========================================
+       01-04 OPENING STORY
+       =========================================== -->
+  <section class="slide story-slide">
+    <div class="story-bg" style="background-image:url('art/1.png')"></div>
+    <div class="story-scrim"></div>
+    <div class="story-panel">
+      <div class="story-tag reveal">01 · 一个具体的决策时刻</div>
+      <div class="story-title reveal"><span class="line">这一门课，</span><span class="line">可能决定她<em>能不能保研</em>。</span></div>
+      <div class="story-copy reveal">
+        <p>林晓，政法大学法学专业大三，<strong>绩点卡在保研边缘</strong>。</p>
+        <p>下学期必修的《民事诉讼法》四位老师同时开班，选谁，她有选择权，也几乎<strong>只有这一次机会</strong>。</p>
+        <p><span class="kw">选错，就可能失去保研资格。</span></p>
+      </div>
+    </div>
+    <div class="time-pill">0:00-0:08</div>
+  </section>
+
+  <section class="slide story-slide">
+    <div class="story-bg" style="background-image:url('art/2.png')"></div>
+    <div class="story-scrim"></div>
+    <div class="story-panel">
+      <div class="story-tag reveal">02 · 她做了所有能做的事</div>
+      <div class="story-title reveal"><span class="line">她有一堆评价，</span><span class="line">却<em>没法拼成判断</em>。</span></div>
+      <div class="mini-list reveal">
+        <div class="mini"><b>问学长学姐</b>：“还行”“听说变严了”——全是<b>大白话</b>，主观、样本小，人脑都难解析，更没法横向比。</div>
+        <div class="mini"><b>十几条评价</b>：各说各话、<b>互相矛盾</b>，没有统一维度，谁更适合她，排不出序。</div>
+        <div class="mini faded"><b>口碑还和分数打架</b>：都说陈老师给分好，<b>往届均分却只有 73.5</b>——到底信哪个？</div>
+      </div>
+    </div>
+    <div class="time-pill">0:08-0:18</div>
+  </section>
+
+  <section class="slide story-slide">
+    <div class="story-bg" style="background-image:url('art/3.png')"></div>
+    <div class="story-scrim"></div>
+    <div class="story-panel">
+      <div class="story-tag reveal">03 · 退选截止前一小时</div>
+      <div class="story-title reveal"><span class="line">一次<span class="red">没有依据</span>的选择，</span><span class="line">代价是<span class="red">保研资格</span>。</span></div>
+      <div class="story-copy reveal">
+        <p>退选截止前一小时，她在两个名字之间来回切换，最后凭感觉点了提交。</p>
+        <p>她选到的，是<strong>小组作业多、组内互评、严格考勤、上课发言记分</strong>的那位老师。</p>
+        <p>一学期下来，期末成绩很普通，<strong>被同专业同学反超绩点，最终失去保研资格。</strong></p>
+        <p style="font-size:0.82em;color:var(--ink-mute);">不是她不够努力——这些散乱碎片，本就没法靠人脑拼成一个判断。</p>
+      </div>
+    </div>
+    <div class="time-pill">0:18-0:27</div>
+  </section>
+
+  <section class="slide story-slide">
+    <div class="story-bg" style="background-image:url('art/4.png')"></div>
+    <div class="story-scrim" style="background:rgba(244,240,230,0.82)"></div>
+    <div class="center-punch">
+      <div class="punch reveal">不是没有评价，<br>而是评价<em>无法变成一个能承担后果的决策</em>。</div>
+      <div class="sub reveal">我们访谈了四所学校、三种选课机制下的学生，听到的是同一种困境。</div>
+      <div class="product reveal">这正是 AI 的活：把人脑算不动的散乱口碑，结构化成可比较、对个人可解释的决策依据。</div>
+    </div>
+    <div class="time-pill">0:27-0:35</div>
+  </section>
+
+  <!-- ===========================================
+       CHAPTER 02 DIVIDER
+       =========================================== -->
+  <section class="slide">
+    <div class="divider-content">
+      <div class="divider-num reveal">02</div>
+      <div class="divider-title reveal">产品框架</div>
+      <div class="divider-rule reveal"></div>
+      <div class="divider-sub reveal">不是再做一个 AI 聊天入口——先有评课社区底座，再叠一层 AI 决策。</div>
+    </div>
+  </section>
+
+  <!-- ===========================================
+       05 PRODUCT FRAME
+       =========================================== -->
+  <section class="slide">
+    <div class="slide-content">
+      <div class="split-frame">
+        <div class="media-copy">
+          <div class="chapter reveal">05 · 产品框架</div>
+          <h2 class="reveal">不是再做一个 AI 聊天入口，而是把 AI 嵌进选课流程。</h2>
+          <p class="lead reveal">评课社区先解决内容和信任，AI 决策层再把散乱评价、客观分布和个人目标放进同一个判断框架。</p>
+          <div class="pain-ref reveal">让 AI 长在选课流程里，用户不用专门"去用 AI"</div>
+        </div>
+        <div class="flow-card reveal">
+          <div class="layer-stack">
+            <div class="layer top">
+              <h3>AI 选课决策层</h3>
+              <div class="pills">
+                <span class="pill">评价结构化</span>
+                <span class="pill">证据高亮</span>
+                <span class="pill">矛盾提醒</span>
+                <span class="pill">我的选课解释</span>
+              </div>
+            </div>
+            <div class="layer">
+              <h3>评课社区底座</h3>
+              <div class="pills">
+                <span class="pill">最新点评</span>
+                <span class="pill">课程库</span>
+                <span class="pill">课程详情</span>
+                <span class="pill">往届给分分布</span>
+              </div>
+            </div>
+          </div>
+          <div class="flow">
+            <div class="flow-step"><b>1</b><span>散乱评价</span></div>
+            <div class="flow-step"><b>2</b><span>结构化字段</span></div>
+            <div class="flow-step"><b>3</b><span>可解释决策</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===========================================
+       06 REVIEW FEED
+       =========================================== -->
+  <section class="slide">
+    <div class="slide-content">
+      <div class="media-layout">
+        <div class="media-copy">
+          <div class="chapter reveal">06 · 社区底座</div>
+          <h2 class="reveal">先让评价持续发生，AI 才有燃料。</h2>
+          <p class="lead reveal">新用户看到最新点评流，知道社区是活的；绑定教务后，系统会优先邀请评价自己上过的课。</p>
+          <div class="takeaway reveal">解决冷启动：没有持续的真实评价，再强的 AI 也无米下锅。这一层负责把评价"喂"进来。</div>
+          <div class="pain-ref reveal">对应：评价没人写、信息会过期</div>
+        </div>
+        <div class="media-frame reveal">
+          <video src="assets/videos/demo-01-review-feed.mp4" poster="assets/posters/demo-01-review-feed.png" controls muted playsinline preload="metadata"></video>
+          <div class="caption">点评流 + 邀请评价已修课</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===========================================
+       CHAPTER 03 DIVIDER
+       =========================================== -->
+  <section class="slide">
+    <div class="divider-content">
+      <div class="divider-num reveal">03</div>
+      <div class="divider-title reveal">AI 如何把散乱评价变成决策</div>
+      <div class="divider-rule reveal"></div>
+      <div class="divider-sub reveal">结构化 · 证据回溯 · 矛盾提醒 · 课表冲突 · 可解释匹配——接下来逐个演示。</div>
+    </div>
+  </section>
+
+  <!-- ===========================================
+       07 STRUCTURE REVIEW
+       =========================================== -->
+  <section class="slide">
+    <div class="slide-content">
+      <div class="media-layout">
+        <div class="media-copy">
+          <div class="chapter reveal">07 · AI 结构化</div>
+          <h2 class="reveal">十几条各说各话的评价，第一次有了能横向比的统一刻度。</h2>
+          <div class="tag-row reveal">
+            <span class="tag">给分</span>
+            <span class="tag">作业量</span>
+            <span class="tag">点名</span>
+            <span class="tag">课堂点人</span>
+            <span class="tag">适合人群</span>
+          </div>
+          <div class="takeaway reveal">学生照常写人话，不填复杂表单；AI 把大白话抽成统一字段——这是规则穷举不了、唯一非 AI 不可的一步。</div>
+          <div class="pain-ref reveal">对应：大白话评价没法横向比</div>
+        </div>
+        <div class="media-frame reveal">
+          <video src="assets/videos/demo-02-write-review-structure.mp4" poster="assets/posters/demo-02-write-review-structure.png" controls muted playsinline preload="metadata"></video>
+          <div class="caption">原话评价 -> 13 个结构化字段</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===========================================
+       08 COURSE SUMMARY
+       =========================================== -->
+  <section class="slide">
+    <div class="slide-content">
+      <div class="media-layout">
+        <div class="media-copy">
+          <div class="chapter reveal">08 · 课程详情</div>
+          <h2 class="reveal">不用翻十几条帖子，一眼看清这门课在每个维度上到底怎样。</h2>
+          <div class="bullet-cards reveal">
+            <div class="mini-card"><strong>教学质量</strong>讲课是否清楚、有无体系。</div>
+            <div class="mini-card"><strong>作业与习题</strong>作业量、反馈、占用时间。</div>
+            <div class="mini-card"><strong>考试与给分</strong>考试难度、给分分布。</div>
+            <div class="mini-card"><strong>课堂氛围</strong>点名、点人、助教支持。</div>
+          </div>
+          <div class="pain-ref reveal">对应：信息太散、要翻很久才看得过来</div>
+        </div>
+        <div class="media-frame reveal">
+          <video src="assets/videos/demo-03-course-summary.mp4" poster="assets/posters/demo-03-course-summary.png" controls muted playsinline preload="metadata"></video>
+          <div class="caption">AI 课程概览 · 分模块整理</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===========================================
+       09 EVIDENCE
+       =========================================== -->
+  <section class="slide">
+    <div class="slide-content">
+      <div class="media-layout">
+        <div class="media-copy">
+          <div class="chapter reveal">09 · 证据回溯</div>
+          <h2 class="reveal">不必"信不信 AI"——每个结论都能点开看见它从哪条评价来。</h2>
+          <div class="tag-row reveal">
+            <span class="tag green">引用自点评</span>
+            <span class="tag green">客观字段</span>
+            <span class="tag green">可回溯</span>
+          </div>
+          <div class="takeaway reveal">“给分慷慨”来自哪些原文，“均分 85.1”来自哪个分布字段，用户能点开看到。AI 不是黑箱，敢给结论也敢交底。</div>
+          <div class="pain-ref reveal">对应：没人敢定论、不知该信谁</div>
+        </div>
+        <div class="media-frame reveal">
+          <video src="assets/videos/demo-04-evidence-panel.mp4" poster="assets/posters/demo-04-evidence-panel.png" controls muted playsinline preload="metadata"></video>
+          <div class="caption">引用自点评 / 客观字段</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===========================================
+       10 CONTRADICTION
+       =========================================== -->
+  <section class="slide">
+    <div class="slide-content">
+      <div class="media-layout">
+        <div class="media-copy">
+          <div class="chapter reveal">10 · 风险提示</div>
+          <h2 class="reveal">"都说给分好却均分 73.5"——这种坑，系统替你先看出来。</h2>
+          <div class="tag-row reveal">
+            <span class="tag warn">口碑偏乐观</span>
+            <span class="tag warn">均分 73.5</span>
+            <span class="tag warn">A 率 8%</span>
+          </div>
+          <div class="takeaway reveal">口碑和客观分布打架时，AI 主动提醒、建议优先看分布——从"总结器"升级成"风险提示器"。</div>
+          <div class="pain-ref reveal">对应：口碑和分数打架，信哪个</div>
+        </div>
+        <div class="media-frame reveal">
+          <video src="assets/videos/demo-05-contradiction-warning.mp4" poster="assets/posters/demo-05-contradiction-warning.png" controls muted playsinline preload="metadata"></video>
+          <div class="caption">陈红案例 · 口碑与分布不一致</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===========================================
+       11 TIMETABLE
+       =========================================== -->
+  <section class="slide">
+    <div class="slide-content">
+      <div class="media-layout">
+        <div class="media-copy">
+          <div class="chapter reveal">11 · 回到选课任务</div>
+          <h2 class="reveal">一眼看清：选了这门，课表会不会撞、放不放得进这学期。</h2>
+          <p class="lead reveal">模拟绑定教务后，学生可以直接看到本学期可选课程、当前课表、学分进度和时间冲突。</p>
+          <div class="takeaway reveal">时间冲突是客观约束，不靠 AI 猜——用户不用自己拿课表逐节比对。</div>
+          <div class="pain-ref reveal">对应：撞课要自己手动比对</div>
+        </div>
+        <div class="media-frame reveal">
+          <video src="assets/videos/demo-06-my-courses-timetable.mp4" poster="assets/posters/demo-06-my-courses-timetable.png" controls muted playsinline preload="metadata"></video>
+          <div class="caption">我的选课 · 课表前置</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===========================================
+       12 TEACHER COMPARE
+       =========================================== -->
+  <section class="slide">
+    <div class="slide-content">
+      <div class="media-layout">
+        <div class="media-copy">
+          <div class="chapter reveal">12 · 可解释匹配</div>
+          <h2 class="reveal">回到林晓的任务：4 位老师里，针对"保研冲绩点"该选谁、为什么。</h2>
+          <div class="tag-row reveal">
+            <span class="tag">王明哲 79</span>
+            <span class="tag">李静 71</span>
+            <span class="tag warn">陈红 37</span>
+            <span class="tag warn">张伟 36</span>
+          </div>
+          <div class="takeaway reveal">同样的课，保研的人和避险的人答案不同——这是普通评课社区给不了的"对我而言"。系统给排序，更给可追溯的解释，不替用户拍脑袋。</div>
+          <div class="pain-ref reveal">对应：千人千面，社区只给同一个页面</div>
+        </div>
+        <div class="media-frame reveal">
+          <video src="assets/videos/demo-07-my-courses-teacher-compare.mp4" poster="assets/posters/demo-07-my-courses-teacher-compare.png" controls muted playsinline preload="metadata"></video>
+          <div class="caption">民诉 4 位老师 · 匹配解释</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===========================================
+       13 CHATBI
+       =========================================== -->
+  <section class="slide">
+    <div class="slide-content">
+      <div class="media-layout">
+        <div class="media-copy">
+          <div class="chapter reveal">13 · ChatBI 轻触点</div>
+          <h2 class="reveal">有临时问题？直接用人话问，不用学怎么筛选。</h2>
+          <div class="tag-row reveal">
+            <span class="tag yellow">给分 = 慷慨</span>
+            <span class="tag yellow">点名 = 无 / 偶尔</span>
+            <span class="tag yellow">课堂点人 = 不会 / 较少</span>
+          </div>
+          <div class="takeaway reveal">不是通用闲聊——把一句话翻译成结构化查询条件，再从真实数据里命中。它是补充触点，不是主高潮。</div>
+          <div class="pain-ref reveal">对应：不想学复杂筛选器</div>
+        </div>
+        <div class="media-frame reveal">
+          <video src="assets/videos/demo-08-chatbi-query.mp4" poster="assets/posters/demo-08-chatbi-query.png" controls muted playsinline preload="metadata"></video>
+          <div class="caption">问：哪门课给分好又不点名？</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===========================================
+       CHAPTER 04 DIVIDER
+       =========================================== -->
+  <section class="slide">
+    <div class="divider-content">
+      <div class="divider-num reveal">04</div>
+      <div class="divider-title reveal">机制与收束</div>
+      <div class="divider-rule reveal"></div>
+      <div class="divider-sub reveal">AI 到底在哪？为什么它可控、可追溯——也是这套设计真正的护城河。</div>
+    </div>
+  </section>
+
+  <!-- ===========================================
+       14 MECHANISM
+       =========================================== -->
+  <section class="slide">
+    <div class="slide-content">
+      <div>
+        <div class="chapter reveal">14 · AI 机制收束</div>
+        <h2 class="reveal">LLM 负责语义结构化，排序和统计走确定性规则。</h2>
+        <p class="lead reveal">这让产品既有 AI 能力，又能保持可控、可追溯、可解释。</p>
+        <div class="mechanism reveal">
+          <div class="mechanism-card">
+            <b>01</b>
+            <h3>原话评价</h3>
+            <p>保留人的真实表达，不把所有内容洗成模板。</p>
+          </div>
+          <div class="mechanism-card">
+            <b>02</b>
+            <h3>AI 结构化</h3>
+            <p>把给分、作业、点名、课堂点人等语义抽成统一字段。</p>
+          </div>
+          <div class="mechanism-card">
+            <b>03</b>
+            <h3>客观数据</h3>
+            <p>给分分布、课表冲突、学分进度不靠模型猜。</p>
+          </div>
+          <div class="mechanism-card">
+            <b>04</b>
+            <h3>可解释决策</h3>
+            <p>每条总结、风险和排序都能回到证据。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===========================================
+       15 CLOSING
+       =========================================== -->
+  <section class="slide">
+    <div class="slide-content">
+      <div class="closing">
+        <div class="media-copy">
+          <div class="chapter reveal">15 · 结尾</div>
+          <div class="closing-line reveal">把散乱评价，变成 high-stakes 选课里的<em>可解释决策</em>。</div>
+          <p class="lead reveal">我们不是替学生做决定，而是让她用更少的不确定性，做出更有证据的选择。</p>
+        </div>
+        <div class="montage reveal">
+          <div class="shot a"><img src="assets/screenshots/course-detail-overview.png" alt="课程详情总览"></div>
+          <div class="shot b"><img src="assets/screenshots/my-courses-teacher-compare.png" alt="我的选课老师对比"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    /* ===========================================
+       SLIDE PRESENTATION CONTROLLER
+       =========================================== */
+    class SlidePresentation {
+      constructor() {
+        this.slides = Array.from(document.querySelectorAll('.slide'));
+        this.currentSlide = 0;
+        this.progressBar = document.getElementById('progressBar');
+        this.navDots = document.getElementById('navDots');
+        this.wheelLocked = false;
+        this.touchStartY = 0;
+        this.setupNavDots();
+        this.setupIntersectionObserver();
+        this.setupKeyboardNav();
+        this.setupTouchNav();
+        this.setupWheelNav();
+        this.goToSlide(0, false);
+      }
+
+      setupIntersectionObserver() {
+        this.observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              this.currentSlide = this.slides.indexOf(entry.target);
+              this.updateProgress();
+              this.updateDots();
+              this.handleVideoPlayback();
+            }
+          });
+        }, { threshold: 0.58 });
+
+        this.slides.forEach((slide) => this.observer.observe(slide));
+      }
+
+      setupKeyboardNav() {
+        document.addEventListener('keydown', (event) => {
+          if (['ArrowRight', 'ArrowDown', ' ', 'PageDown'].includes(event.key)) {
+            event.preventDefault();
+            this.goToSlide(this.currentSlide + 1);
+          }
+          if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(event.key)) {
+            event.preventDefault();
+            this.goToSlide(this.currentSlide - 1);
+          }
+          if (event.key === 'Home') {
+            event.preventDefault();
+            this.goToSlide(0);
+          }
+          if (event.key === 'End') {
+            event.preventDefault();
+            this.goToSlide(this.slides.length - 1);
+          }
+        });
+      }
+
+      setupTouchNav() {
+        document.addEventListener('touchstart', (event) => {
+          this.touchStartY = event.touches[0].clientY;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (event) => {
+          const delta = this.touchStartY - event.changedTouches[0].clientY;
+          if (Math.abs(delta) < 45) return;
+          this.goToSlide(this.currentSlide + (delta > 0 ? 1 : -1));
+        }, { passive: true });
+      }
+
+      setupWheelNav() {
+        document.addEventListener('wheel', (event) => {
+          if (this.wheelLocked || Math.abs(event.deltaY) < 24) return;
+          this.wheelLocked = true;
+          this.goToSlide(this.currentSlide + (event.deltaY > 0 ? 1 : -1));
+          setTimeout(() => { this.wheelLocked = false; }, 680);
+        }, { passive: true });
+      }
+
+      setupNavDots() {
+        this.slides.forEach((_, index) => {
+          const dot = document.createElement('button');
+          dot.type = 'button';
+          dot.setAttribute('aria-label', `跳转到第 ${index + 1} 页`);
+          dot.addEventListener('click', () => this.goToSlide(index));
+          this.navDots.appendChild(dot);
+        });
+      }
+
+      goToSlide(index, smooth = true) {
+        const target = Math.max(0, Math.min(this.slides.length - 1, index));
+        this.currentSlide = target;
+        this.slides[target].scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+        this.updateProgress();
+        this.updateDots();
+        window.setTimeout(() => this.handleVideoPlayback(), 300);
+      }
+
+      updateProgress() {
+        const percent = ((this.currentSlide + 1) / this.slides.length) * 100;
+        this.progressBar.style.width = `${percent}%`;
+      }
+
+      updateDots() {
+        Array.from(this.navDots.children).forEach((dot, index) => {
+          dot.classList.toggle('active', index === this.currentSlide);
+        });
+      }
+
+      handleVideoPlayback() {
+        document.querySelectorAll('video').forEach((video) => {
+          const isCurrent = this.slides[this.currentSlide].contains(video);
+          if (isCurrent) {
+            video.currentTime = video.currentTime || 0;
+          } else {
+            video.pause();
+          }
+        });
+      }
+    }
+
+    new SlidePresentation();
+  </script>
+</body>
+</html>
